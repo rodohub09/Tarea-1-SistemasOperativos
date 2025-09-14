@@ -9,7 +9,7 @@
 
 extern char *args[MAX_ARGS];
 extern char *pipes[MAX_PIPES];
-
+extern char input[MAX_INPUT];
 void split_args(char *entrada);
 void split_pipes();
 void ejecutar_pipes(int MAX);
