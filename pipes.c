@@ -4,15 +4,17 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/times.h>
 
 char *args[MAX_ARGS];      //Array de strings usado para guardar un comando y sus argumentos 
 char *pipes[MAX_PIPES];    //Array de strings usado cuando hay pipes para guardar cada comando y argumentos en cada espacio
 char input[MAX_INPUT];     //String donde se guarda la input principal
 //Tokeniza cierta string por cada espacio encontrado, cada subcadena la guarda en "args"
+struct tms t;
+clock_t start, end;
 
 void split_args(char *entrada){
   int i = 0;
-  int j = 0;
   args[i] = strtok(entrada, " ");
   while(args[i] != NULL && i < MAX_ARGS -1){
     args[++i] = strtok(NULL, " ");
@@ -44,9 +46,11 @@ void split_pipes(){
 void ejecutar_pipes(int MAX){  // Recibe la cantidad de procesos a ejecutar
   
   int c_pipes[MAX][2];         /*Se crea una matriz de la cantidad de proces x 2, en particular
-				 c_pipes[MAX][0] = lectura y c_pipes[MAX][0] = escritura */
+				 c_pipes[MAX][0] = lectura y c_pipes[MAX][1] = escritura */
 				 
   pid_t pid;
+
+  start = times(&t);
   
   for(int i = 0; i< MAX; i++){   // Se ejecuta un ciclo creando cada pipe
     if(pipe(c_pipes[i]) == -1){
@@ -54,7 +58,7 @@ void ejecutar_pipes(int MAX){  // Recibe la cantidad de procesos a ejecutar
       exit(EXIT_FAILURE);
     }
   }
-  
+		
   for(int i = 0; i < MAX;i++){     //Ciclo principal de ejecucion
     
     pid = fork();                  // Crea un hijo
@@ -68,7 +72,7 @@ void ejecutar_pipes(int MAX){  // Recibe la cantidad de procesos a ejecutar
       }
 
       // Si no es el ultimo comando, envia la salida al pipe actual y escribe en el
-      if(i < MAX -1){
+      if(i < MAX - 1){
 	dup2(c_pipes[i][1], STDOUT_FILENO);
       }
       
@@ -89,17 +93,17 @@ void ejecutar_pipes(int MAX){  // Recibe la cantidad de procesos a ejecutar
       }	
     }
   }
+   //Cerramos todos los pipes del padre ya que no necesita leer ni escribir
+   for(int i = 0; i < MAX - 1; i++){
+     close(c_pipes[i][0]);
+     close(c_pipes[i][1]);
+   }
 
-  //Cerramos todos los pipes del padre ya que no necesita leer ni escribir
-  for(int i = 0; i < MAX - 1; i++){
-    close(c_pipes[i][0]);
-    close(c_pipes[i][1]);
+   //El padre espera por el hijo en cada iteracion
+   for(int i = 0; i < MAX; i++){
+     wait(NULL);
   }
-
-  //El padre espera por el hijo en cada iteracion
-  for(int i = 0; i < MAX; i++){
-    wait(NULL);
-  }
+  end = times(&t);
 }
   
 

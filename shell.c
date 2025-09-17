@@ -6,11 +6,13 @@
 #include <stdbool.h>
 #include "pipes.h"
 #include "varios.h"
+#include <sys/times.h>
 
 int main(){
 
   bool pipe;         
   int num_pipes = 0;
+  int miprof;
   
   while(1){
     printf("Shell/> $ ");   // Prompt
@@ -29,7 +31,7 @@ int main(){
     else if(strlen(input) == 0){  //En caso de solo presionar enter, pasa a la siguiente iteracion del while
       continue;
     }
-       
+    miprof = check_miprof();
     pipe = check(&num_pipes);     // Pipe llama a la funcion check y toma true o false, dependiendo de la existencia de pipes 
     
     if(!pipe){                   // En caso de no haber, se hace split de "input" para separar el comando de sus argumentos y luego se ejecuta
@@ -41,9 +43,46 @@ int main(){
       split_pipes();
       ejecutar_pipes(num_pipes + 1);
     }
-    num_pipes = 0;              // Reiniciamos el valor para futuras ejecuciones de comandos con pipes
+    num_pipes = 0; // Reiniciamos el valor para futuras ejecuciones de comandos con pipes
+    ejec_miprof(miprof);
   }
   return 0;
 }
 
+
+void ejec_miprof(int miprof){
+  long ticks = sysconf(_SC_CLK_TCK);
+  switch(miprof){
+  case 1:
+    printf("User: %f s\n", (double)(t.tms_utime) / ticks);
+    printf("Sys : %f s\n", (double)(t.tms_stime) / ticks);
+    printf("Total real: %f s\n", (double)(end - start) / ticks);
+    break;
+  }
+}
+
+int check_miprof(){
+  char *arg = strtok(input, " ");
+  
+  if(strcmp(arg,"miprof") != 0){
+    return 0;
+  }
+  else{
+    arg = strtok(NULL, " ");
+    if(strcmp(arg,"ejec") == 0){
+      memmove(input,input+12,strlen(input+12)+1);
+      printf("%s\n", input);
+      return 1;
+    }
+    else if(strcmp(arg,"ejecsave") == 0){
+      memmove(input,input+16,strlen(input+16)+1);
+      printf("%s\n", input);
+      return 2;
+    }
+    else{
+      printf("Error al ingresar comando miprof\n");
+      return 3;
+    } 
+  }
+}
       

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/times.h>
 
 extern char *args[MAX_ARGS];
 
@@ -14,6 +15,7 @@ void ejecutar(){
   pid_t pid;           //Se definen variables y se crea un hijo
   pid = fork();
 
+  start = times(&t);
   if(pid == 0){
     // Proceso hijo ejecuta el comando
     if(execvp(args[0], args) == -1){
@@ -28,4 +30,5 @@ void ejecutar(){
   else {
     printf("Error al ejecutar el fork");
   }
+  end = times(&t);
 }
