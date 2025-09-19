@@ -1,10 +1,12 @@
 #include "pipes.h"
+#include "varios.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/times.h>
+#include <sys/resource.h>
 
 char *args[MAX_ARGS];      //Array de strings usado para guardar un comando y sus argumentos 
 char *pipes[MAX_PIPES];    //Array de strings usado cuando hay pipes para guardar cada comando y argumentos en cada espacio
@@ -50,7 +52,8 @@ void ejecutar_pipes(int MAX){  // Recibe la cantidad de procesos a ejecutar
 				 
   pid_t pid;
 
-  start = times(&t);
+  gettimeofday(&start_time,NULL);
+  getrusage(RUSAGE_SELF,&start_usage);
   
   for(int i = 0; i< MAX; i++){   // Se ejecuta un ciclo creando cada pipe
     if(pipe(c_pipes[i]) == -1){
@@ -103,7 +106,8 @@ void ejecutar_pipes(int MAX){  // Recibe la cantidad de procesos a ejecutar
    for(int i = 0; i < MAX; i++){
      wait(NULL);
   }
-  end = times(&t);
+  gettimeofday(&end_time,NULL);
+  getrusage(RUSAGE_SELF,&end_usage);
 }
   
 

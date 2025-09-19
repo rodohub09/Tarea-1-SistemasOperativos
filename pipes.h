@@ -11,8 +11,13 @@
 extern char *args[MAX_ARGS];
 extern char *pipes[MAX_PIPES];
 extern char input[MAX_INPUT];
-extern struct tms t;
-extern clock_t start, end;
+extern struct timeval start_time;
+extern struct timeval end_time;
+
+extern struct rusage start_usage;
+extern struct rusage end_usage;
+
+
 void split_args(char *entrada);
 void split_pipes();
 void ejecutar_pipes(int MAX);

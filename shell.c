@@ -43,7 +43,7 @@ int main(){
       split_pipes();
       ejecutar_pipes(num_pipes + 1);
     }
-    num_pipes = 0; // Reiniciamos el valor para futuras ejecuciones de comandos con pipes
+    num_pipes = 0;              // Reiniciamos el valor para futuras ejecuciones de comandos con pipes
     ejec_miprof(miprof);
   }
   return 0;
@@ -51,16 +51,15 @@ int main(){
 
 
 void ejec_miprof(int miprof){
-  long ticks = sysconf(_SC_CLK_TCK);
   switch(miprof){
   case 1:
-    printf("User: %f s\n", (double)(t.tms_utime) / ticks);
-    printf("Sys : %f s\n", (double)(t.tms_stime) / ticks);
-    printf("Total real: %f s\n", (double)(end - start) / ticks);
+    calcular_tiempos(0);
+    break;
+  case 2:
+    calcular_tiempos(1);
     break;
   }
 }
-
 int check_miprof(){
   char *arg = strtok(input, " ");
   
@@ -71,12 +70,10 @@ int check_miprof(){
     arg = strtok(NULL, " ");
     if(strcmp(arg,"ejec") == 0){
       memmove(input,input+12,strlen(input+12)+1);
-      printf("%s\n", input);
       return 1;
     }
     else if(strcmp(arg,"ejecsave") == 0){
       memmove(input,input+16,strlen(input+16)+1);
-      printf("%s\n", input);
       return 2;
     }
     else{
