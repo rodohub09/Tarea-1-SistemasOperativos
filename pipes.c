@@ -5,15 +5,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <sys/times.h>
 #include <sys/resource.h>
 
 char *args[MAX_ARGS];      //Array de strings usado para guardar un comando y sus argumentos 
 char *pipes[MAX_PIPES];    //Array de strings usado cuando hay pipes para guardar cada comando y argumentos en cada espacio
 char input[MAX_INPUT];     //String donde se guarda la input principal
+
 //Tokeniza cierta string por cada espacio encontrado, cada subcadena la guarda en "args"
-struct tms t;
-clock_t start, end;
 
 void split_args(char *entrada){
   int i = 0;
@@ -53,7 +51,7 @@ void ejecutar_pipes(int MAX){  // Recibe la cantidad de procesos a ejecutar
   pid_t pid;
 
   gettimeofday(&start_time,NULL);
-  getrusage(RUSAGE_SELF,&start_usage);
+  getrusage(RUSAGE_CHILDREN,&start_usage);
   
   for(int i = 0; i< MAX; i++){   // Se ejecuta un ciclo creando cada pipe
     if(pipe(c_pipes[i]) == -1){
@@ -107,7 +105,7 @@ void ejecutar_pipes(int MAX){  // Recibe la cantidad de procesos a ejecutar
      wait(NULL);
   }
   gettimeofday(&end_time,NULL);
-  getrusage(RUSAGE_SELF,&end_usage);
+  getrusage(RUSAGE_CHILDREN,&end_usage);
 }
   
 

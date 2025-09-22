@@ -3,6 +3,8 @@
 
 #include <sys/types.h>
 
+extern char *archivo;
+extern int tiempo;
 extern char *args[];
 extern struct timeval start_time;
 extern struct timeval end_time;

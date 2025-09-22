@@ -1,3 +1,0 @@
-Tiempo real: 0.002831 segundos
-Tiempo de usuario: 0.000000 segundos
-Tiempo de sistema: 0.000048 segundos

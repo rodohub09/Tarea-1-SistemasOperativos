@@ -32,7 +32,7 @@ int main(){
       continue;
     }
     miprof = check_miprof();
-    pipe = check(&num_pipes);     // Pipe llama a la funcion check y toma true o false, dependiendo de la existencia de pipes 
+    pipe = check(&num_pipes);     // Pipe llama a la funcion check y toma true o false, dependiendo de la existencia de pipes
     
     if(!pipe){                   // En caso de no haber, se hace split de "input" para separar el comando de sus argumentos y luego se ejecuta
       split_args(input);
@@ -73,12 +73,18 @@ int check_miprof(){
       return 1;
     }
     else if(strcmp(arg,"ejecsave") == 0){
-      memmove(input,input+16,strlen(input+16)+1);
+      archivo = strtok(NULL, " ");
+      memmove(input,input+16+strlen(archivo)+1,strlen(input+16+strlen(archivo)+1)+1);
       return 2;
+    }
+    else if(strcmp(arg,"ejecutar") == 0){
+      tiempo = strtok(NULL, " ");
+      memmove(input,input+16,strlen(input+16)+1);
+      return 3;
     }
     else{
       printf("Error al ingresar comando miprof\n");
-      return 3;
+      return 4;
     } 
   }
 }
