@@ -7,7 +7,7 @@
 #include <signal.h>
 #include <sys/times.h>
 #include <sys/resource.h>
-
+#include <string.h>
 char *archivo;
 int tiempo;
 char saveinput[MAX_INPUT];
@@ -20,11 +20,12 @@ struct rusage end_usage;
 
 int status;
 pid_t pid;           //Se definen variables y se crea un hijo
+long max_mem;
 
 //Funcion para ejecutar comandos simples
 void ejecutar(unsigned int limite){
   
-  if(limite == NULL){
+  if(limite == 0){
     gettimeofday(&start_time,NULL);
     getrusage(RUSAGE_CHILDREN,&start_usage);
 
@@ -47,6 +48,7 @@ void ejecutar(unsigned int limite){
   
     gettimeofday(&end_time,NULL);
     getrusage(RUSAGE_CHILDREN,&end_usage);
+    max_mem = end_usage.ru_maxrss;
   }
   else{
     
@@ -94,7 +96,8 @@ void calcular_tiempos(int salida){
     printf("Tiempo real: %.6f segundos\n", real_time);
     printf("Tiempo de usuario: %.6f segundos\n", user_time);
     printf("Tiempo de sistema: %.6f segundos\n", sys_time);
-    printf("");
+    printf("Máxima RAM usada: %ld KB\n", max_mem);
+    printf("\n");
     }
     else{
       FILE *results = fopen(archivo, "r");
@@ -115,6 +118,7 @@ void calcular_tiempos(int salida){
       fprintf(results,"Tiempo real: %.6f segundos\n", real_time);
       fprintf(results,"Tiempo de usuario: %.6f segundos\n", user_time);
       fprintf(results,"Tiempo de sistema: %.6f segundos\n", sys_time);
+      fprintf(results,"Máxima RAM usada: %ld KB\n", max_mem);
       fprintf(results,"\n");
       fclose(results);
     }
@@ -124,3 +128,47 @@ void timeout(int sig){
   printf("Tiempo limite superado, el proceso ha sido terminado\n");
   kill(pid, SIGKILL);
 }
+
+void ejec_miprof(int miprof){
+  switch(miprof){
+  case 1:
+    calcular_tiempos(0);
+    break;
+  case 2:
+    calcular_tiempos(1);
+    break;
+  }
+}
+
+int check_miprof(){
+  char aux[MAX_INPUT];
+  strcpy(aux, input);
+  char *arg = strtok(aux, " ");
+  
+  if(strcmp(arg,"miprof") != 0){
+    return 0;
+  }
+  else{
+    arg = strtok(NULL, " ");
+    if(strcmp(arg,"ejec") == 0){
+      memmove(input,input+12,strlen(input+12)+1);
+      return 1;
+    }
+    else if(strcmp(arg,"ejecsave") == 0){
+      archivo = strtok(NULL, " ");
+      memmove(input,input+16+strlen(archivo)+1,strlen(input+16+strlen(archivo)+1)+1);
+      strcpy(saveinput, input);
+      return 2;
+    }
+    else if(strcmp(arg,"ejecutar") == 0){
+      char *auxtiempo = strtok(NULL, " ");
+      memmove(input,input+16+strlen(auxtiempo)+1, strlen(input+16+strlen(auxtiempo)+1)+1);
+      tiempo = (unsigned int) atoi(auxtiempo);
+      return 3;
+    }
+    else{
+      printf("Error al ingresar comando miprof\n");
+      return 4;
+    } 
+  }
+}      

@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
-
+#include <sys/time.h>
 char *args[MAX_ARGS];      //Array de strings usado para guardar un comando y sus argumentos 
 char *pipes[MAX_PIPES];    //Array de strings usado cuando hay pipes para guardar cada comando y argumentos en cada espacio
 char input[MAX_INPUT];     //String donde se guarda la input principal
@@ -107,6 +107,7 @@ void ejecutar_pipes(int MAX, unsigned int limite){  // Recibe la cantidad de pro
     }
     gettimeofday(&end_time,NULL);
     getrusage(RUSAGE_CHILDREN,&end_usage);
+    max_mem = end_usage.ru_maxrss;
   }
 }
   

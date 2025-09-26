@@ -3,7 +3,7 @@
 
 #include "pipes.h"
 #include <sys/types.h>
-
+#include <string.h>
 extern char *archivo;
 extern int tiempo;
 extern char saveinput[MAX_INPUT];
@@ -15,5 +15,7 @@ extern struct rusage end_usage;
 
 void ejecutar(unsigned int limite);
 void calcular_tiempos();
+void ejec_miprof(int miprof);
+int check_miprof();
 void timeout(int sig);
 #endif

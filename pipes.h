@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 #include <sys/times.h>
-
+#include <sys/time.h>
 #define MAX_INPUT 1024
 #define MAX_ARGS 128
 #define MAX_PIPES 128
@@ -16,7 +16,7 @@ extern struct timeval end_time;
 
 extern struct rusage start_usage;
 extern struct rusage end_usage;
-
+extern long max_mem;
 
 void split_args(char *entrada);
 void split_pipes();

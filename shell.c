@@ -53,12 +53,12 @@ int main(){
       
       if(!pipe){                   // En caso de no haber, se hace split de "input" para separar el comando de sus argumentos y luego se ejecuta
 	split_args(input);
-	ejecutar(NULL);
+	ejecutar(0);
       }
       else{                       /* En caso de haber pipes, se hace split de los mismos para separar cada pipe y se llama la funcion ejecutar pipes
 				     con num_pipes + 1 correspondiendo  a la cantidad de procesos necesarios */
 	split_pipes();
-	ejecutar_pipes(num_pipes + 1,NULL);
+	ejecutar_pipes(num_pipes + 1,0);
       }
       num_pipes = 0;              // Reiniciamos el valor para futuras ejecuciones de comandos con pipes
       ejec_miprof(miprof);
@@ -69,46 +69,3 @@ int main(){
 }
 
 
-void ejec_miprof(int miprof){
-  switch(miprof){
-  case 1:
-    calcular_tiempos(0);
-    break;
-  case 2:
-    calcular_tiempos(1);
-    break;
-  }
-}
-
-int check_miprof(){
-  char aux[MAX_INPUT];
-  strcpy(aux, input);
-  char *arg = strtok(aux, " ");
-  
-  if(strcmp(arg,"miprof") != 0){
-    return 0;
-  }
-  else{
-    arg = strtok(NULL, " ");
-    if(strcmp(arg,"ejec") == 0){
-      memmove(input,input+12,strlen(input+12)+1);
-      return 1;
-    }
-    else if(strcmp(arg,"ejecsave") == 0){
-      archivo = strtok(NULL, " ");
-      memmove(input,input+16+strlen(archivo)+1,strlen(input+16+strlen(archivo)+1)+1);
-      strcpy(saveinput, input);
-      return 2;
-    }
-    else if(strcmp(arg,"ejecutar") == 0){
-      char *auxtiempo = strtok(NULL, " ");
-      memmove(input,input+16+strlen(auxtiempo)+1, strlen(input+16+strlen(auxtiempo)+1)+1);
-      tiempo = (unsigned int) atoi(auxtiempo);
-      return 3;
-    }
-    else{
-      printf("Error al ingresar comando miprof\n");
-      return 4;
-    } 
-  }
-}      
