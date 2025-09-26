@@ -20,7 +20,7 @@ extern struct rusage end_usage;
 
 void split_args(char *entrada);
 void split_pipes();
-void ejecutar_pipes(int MAX);
+void ejecutar_pipes(int MAX, unsigned int limite);
 bool check(int *numero_pipes);
 
 #endif

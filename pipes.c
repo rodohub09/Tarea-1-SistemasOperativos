@@ -43,69 +43,71 @@ void split_pipes(){
 
 //Funcion utilizada para ejecutar los comandos en caso de existir pipes 
 
-void ejecutar_pipes(int MAX){  // Recibe la cantidad de procesos a ejecutar
+void ejecutar_pipes(int MAX, unsigned int limite){  // Recibe la cantidad de procesos a ejecutar
   
   int c_pipes[MAX][2];         /*Se crea una matriz de la cantidad de proces x 2, en particular
 				 c_pipes[MAX][0] = lectura y c_pipes[MAX][1] = escritura */
 				 
   pid_t pid;
-
-  gettimeofday(&start_time,NULL);
-  getrusage(RUSAGE_CHILDREN,&start_usage);
   
-  for(int i = 0; i< MAX; i++){   // Se ejecuta un ciclo creando cada pipe
-    if(pipe(c_pipes[i]) == -1){
-      printf("Error al ejecutar el pipe");
-      exit(EXIT_FAILURE);
-    }
-  }
-		
-  for(int i = 0; i < MAX;i++){     //Ciclo principal de ejecucion
-    
-    pid = fork();                  // Crea un hijo
-
-    
-    if(pid == 0){    //Proceso hijo
-
-      // Si no es el primer comando, toma el pipe anterior y lo lee
-      if(i>0){
-	dup2(c_pipes[i-1][0], STDIN_FILENO);
-      }
-
-      // Si no es el ultimo comando, envia la salida al pipe actual y escribe en el
-      if(i < MAX - 1){
-	dup2(c_pipes[i][1], STDOUT_FILENO);
-      }
-      
-      //Cerramos los pipes activos, para evitar errores de lectura
-      
-      for(int j = 0; j < MAX -1; j++){
-	close(c_pipes[j][0]);
-	close(c_pipes[j][1]);
-      }
-
-      // Llama a la funcion split para cada tokenizar cada pipe con sus respectivos argumentos
-      split_args(pipes[i]);
-
-      //Ejecutamos el pipe correspondiente
-      if(execvp(args[0],args) == -1){
-	printf( "Error! , no se reconoce el comando ingresado\n");
+  if(limite == 0){
+    gettimeofday(&start_time,NULL);
+    getrusage(RUSAGE_CHILDREN,&start_usage);
+  
+    for(int i = 0; i< MAX; i++){   // Se ejecuta un ciclo creando cada pipe
+      if(pipe(c_pipes[i]) == -1){
+	printf("Error al ejecutar el pipe");
 	exit(EXIT_FAILURE);
-      }	
+      }
     }
-  }
-   //Cerramos todos los pipes del padre ya que no necesita leer ni escribir
-   for(int i = 0; i < MAX - 1; i++){
-     close(c_pipes[i][0]);
-     close(c_pipes[i][1]);
-   }
+		
+    for(int i = 0; i < MAX;i++){     //Ciclo principal de ejecucion
+    
+      pid = fork();                  // Crea un hijo
 
-   //El padre espera por el hijo en cada iteracion
-   for(int i = 0; i < MAX; i++){
-     wait(NULL);
+    
+      if(pid == 0){    //Proceso hijo
+
+	// Si no es el primer comando, toma el pipe anterior y lo lee
+	if(i>0){
+	  dup2(c_pipes[i-1][0], STDIN_FILENO);
+	}
+
+	// Si no es el ultimo comando, envia la salida al pipe actual y escribe en el
+	if(i < MAX - 1){
+	  dup2(c_pipes[i][1], STDOUT_FILENO);
+	}
+      
+	//Cerramos los pipes activos, para evitar errores de lectura
+      
+	for(int j = 0; j < MAX -1; j++){
+	  close(c_pipes[j][0]);
+	  close(c_pipes[j][1]);
+	}
+
+	// Llama a la funcion split para cada tokenizar cada pipe con sus respectivos argumentos
+	split_args(pipes[i]);
+
+	//Ejecutamos el pipe correspondiente
+	if(execvp(args[0],args) == -1){
+	  printf( "Error! , no se reconoce el comando ingresado\n");
+	  exit(EXIT_FAILURE);
+	}	
+      }
+    }
+    //Cerramos todos los pipes del padre ya que no necesita leer ni escribir
+    for(int i = 0; i < MAX - 1; i++){
+      close(c_pipes[i][0]);
+      close(c_pipes[i][1]);
+    }
+
+    //El padre espera por el hijo en cada iteracion
+    for(int i = 0; i < MAX; i++){
+      wait(NULL);
+    }
+    gettimeofday(&end_time,NULL);
+    getrusage(RUSAGE_CHILDREN,&end_usage);
   }
-  gettimeofday(&end_time,NULL);
-  getrusage(RUSAGE_CHILDREN,&end_usage);
 }
   
 

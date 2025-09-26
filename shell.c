@@ -31,20 +31,39 @@ int main(){
     else if(strlen(input) == 0){  //En caso de solo presionar enter, pasa a la siguiente iteracion del while
       continue;
     }
+    
     miprof = check_miprof();
     pipe = check(&num_pipes);     // Pipe llama a la funcion check y toma true o false, dependiendo de la existencia de pipes
     
-    if(!pipe){                   // En caso de no haber, se hace split de "input" para separar el comando de sus argumentos y luego se ejecuta
-      split_args(input);
-      ejecutar();
+    if(miprof == 3){
+    
+      if(!pipe){                   // En caso de no haber, se hace split de "input" para separar el comando de sus argumentos y luego se ejecuta
+	split_args(input);
+	ejecutar(tiempo);
+      }
+      else{                       /* En caso de haber pipes, se hace split de los mismos para separar cada pipe y se llama la funcion ejecutar pipes
+				     con num_pipes + 1 correspondiendo  a la cantidad de procesos necesarios */
+	split_pipes();
+	ejecutar_pipes(num_pipes + 1,tiempo);
+      }
+      num_pipes = 0;              // Reiniciamos el valor para futuras ejecuciones de comandos con pipes
+    
     }
-    else{                       /* En caso de haber pipes, se hace split de los mismos para separar cada pipe y se llama la funcion ejecutar pipes
-				   con num_pipes + 1 correspondiendo  a la cantidad de procesos necesarios */
-      split_pipes();
-      ejecutar_pipes(num_pipes + 1);
+    else{
+      
+      if(!pipe){                   // En caso de no haber, se hace split de "input" para separar el comando de sus argumentos y luego se ejecuta
+	split_args(input);
+	ejecutar(NULL);
+      }
+      else{                       /* En caso de haber pipes, se hace split de los mismos para separar cada pipe y se llama la funcion ejecutar pipes
+				     con num_pipes + 1 correspondiendo  a la cantidad de procesos necesarios */
+	split_pipes();
+	ejecutar_pipes(num_pipes + 1,NULL);
+      }
+      num_pipes = 0;              // Reiniciamos el valor para futuras ejecuciones de comandos con pipes
+      ejec_miprof(miprof);
+      
     }
-    num_pipes = 0;              // Reiniciamos el valor para futuras ejecuciones de comandos con pipes
-    ejec_miprof(miprof);
   }
   return 0;
 }
@@ -60,8 +79,11 @@ void ejec_miprof(int miprof){
     break;
   }
 }
+
 int check_miprof(){
-  char *arg = strtok(input, " ");
+  char aux[MAX_INPUT];
+  strcpy(aux, input);
+  char *arg = strtok(aux, " ");
   
   if(strcmp(arg,"miprof") != 0){
     return 0;
@@ -75,11 +97,13 @@ int check_miprof(){
     else if(strcmp(arg,"ejecsave") == 0){
       archivo = strtok(NULL, " ");
       memmove(input,input+16+strlen(archivo)+1,strlen(input+16+strlen(archivo)+1)+1);
+      strcpy(saveinput, input);
       return 2;
     }
     else if(strcmp(arg,"ejecutar") == 0){
-      tiempo = strtok(NULL, " ");
-      memmove(input,input+16,strlen(input+16)+1);
+      char *auxtiempo = strtok(NULL, " ");
+      memmove(input,input+16+strlen(auxtiempo)+1, strlen(input+16+strlen(auxtiempo)+1)+1);
+      tiempo = (unsigned int) atoi(auxtiempo);
       return 3;
     }
     else{
@@ -87,5 +111,4 @@ int check_miprof(){
       return 4;
     } 
   }
-}
-      
+}      
